@@ -30,6 +30,9 @@
 
 ```bash
 $ npm install
+$ npm i moment --save
+$ npm install -g forever
+$ npm i -g @nestjs/cli
 ```
 
 ## Running the app
@@ -41,8 +44,9 @@ $ npm run start
 # watch mode
 $ npm run start:dev
 
-# production mode
-$ npm run start:prod
+# Production Mode - Forever Start main.js
+$ cd /dist/
+$ forever start main.js
 ```
 
 ## Test
