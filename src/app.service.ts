@@ -6,7 +6,7 @@ const API_URL =
   'https://ghost-main-static-64f04ca2f3c14e389bfc008da643bd2b.ghostapi.app:29003/api/v1';
 @Injectable()
 export default class ApiService {
-  // Metodo de Web API / Ghost
+  // Metodo de Web API / Ghost - METODO - POST
   async getToken(): Promise<any> {
     const body = {
       username: 'autocancel',
@@ -16,19 +16,18 @@ export default class ApiService {
     const response = await axios.post(`${API_URL}/authenticate`, body);
     return response.data;
   }
-
+  // Metodo de Web API / Ghost - METODO - GET
   async getData_v1(): Promise<any> {
     const token = await this.getToken();
     const headers = {
       'Authentication-Token': token.secret,
     };
-    console.log(headers);
     const response = await axios.get(`${API_URL}/bookings/active`, { headers });
     console.log(response.data);
     return response.data;
   }
 
-  // Cancelacion de reservas por Web API / Ghost
+  // Cancelacion de reservas por Web API / Ghost - METODO - DELETE
   async deleteData_v1(bookings: any[]): Promise<void> {
     const token = await this.getToken();
     const headers = {
@@ -48,12 +47,9 @@ export default class ApiService {
         // Check if more than 5 minutes have passed
         if (timeDifference.asMinutes() >= 5) {
           try {
-            await axios.delete(
-              `https://ghost-main-static-64f04ca2f3c14e389bfc008da643bd2b.ghostapi.app:29003/api/v1/bookings/${booking.id}`,
-              {
-                headers,
-              },
-            );
+            await axios.delete(`${API_URL}/bookings/${booking.id}`, {
+              headers,
+            });
           } catch (err) {
             console.log(err);
           }
