@@ -1,8 +1,69 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import moment = require('moment');
 
+const API_URL =
+  'https://ghost-main-static-64f04ca2f3c14e389bfc008da643bd2b.ghostapi.app:29003/api/v1';
 @Injectable()
-export class ApiService {
+export default class ApiService {
+  // Metodo de Web API / Ghost
+  async getToken(): Promise<any> {
+    const body = {
+      username: 'autocancel',
+      password: 'Autocabad1*',
+    };
+
+    const response = await axios.post(`${API_URL}/authenticate`, body);
+    return response.data;
+  }
+
+  async getData_v1(): Promise<any> {
+    const token = await this.getToken();
+    const headers = {
+      'Authentication-Token': token.secret,
+    };
+    console.log(headers);
+    const response = await axios.get(`${API_URL}/bookings/active`, { headers });
+    console.log(response.data);
+    return response.data;
+  }
+
+  // Cancelacion de reservas por Web API / Ghost
+  async deleteData_v1(bookings: any[]): Promise<void> {
+    const token = await this.getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authentication-Token': token.secret,
+    };
+    await Promise.all(
+      bookings.map(async (booking) => {
+        // Set the reference datetime
+        const referenceDatetime = moment(booking.bookedAtTime);
+        // Get the current datetime
+        const currentDatetime = moment();
+        // Calculate the time difference between the reference datetime and the current datetime
+        const timeDifference = moment.duration(
+          currentDatetime.diff(referenceDatetime),
+        );
+        // Check if more than 5 minutes have passed
+        if (timeDifference.asMinutes() >= 5) {
+          try {
+            await axios.delete(
+              `https://ghost-main-static-64f04ca2f3c14e389bfc008da643bd2b.ghostapi.app:29003/api/v1/bookings/${booking.id}`,
+              {
+                headers,
+              },
+            );
+          } catch (err) {
+            console.log(err);
+          }
+          console.log('Voy a Borrar el ID: ', booking.id);
+        } else {
+          console.log('NO eliminar!');
+        }
+      }),
+    );
+  }
   async postData(): Promise<any> {
     const body = {
       types: ['Active'],
@@ -19,19 +80,44 @@ export class ApiService {
         headers,
       },
     );
-    console.log(response.data);
+    console.log(response.data.bookings.bookedAtTime);
     return response.data.bookings;
   }
-
-  async deleteData(bookingId: number): Promise<void> {
+  async deleteData(bookings: any[]): Promise<void> {
     const headers = {
-      'Ocp-Apim-Subscription-Key': '5018266f057b4ce093e247b73944350aY',
+      'Ocp-Apim-Subscription-Key': '5018266f057b4ce093e247b73944350a',
     };
-    await axios.delete(
-      `https://autocab-api.azure-api.net/booking/v1/booking/${bookingId}`,
-      {
-        headers,
-      },
+
+    await Promise.all(
+      bookings.map(async (booking) => {
+        // Set the reference datetime
+        const referenceDatetime = moment(booking.bookedAtTime);
+
+        // Get the current datetime
+        const currentDatetime = moment();
+
+        // Calculate the time difference between the reference datetime and the current datetime
+        const timeDifference = moment.duration(
+          currentDatetime.diff(referenceDatetime),
+        );
+
+        // Check if more than 5 minutes have passed
+        if (timeDifference.asMinutes() >= 1) {
+          try {
+            await axios.delete(
+              `https://autocab-api.azure-api.net/booking/v1/booking/${booking.id}`,
+              {
+                headers,
+              },
+            );
+          } catch (err) {
+            console.log(err);
+          }
+          console.log('Voy a Borrar el ID: ', booking.id);
+        } else {
+          console.log('NO eliminar!');
+        }
+      }),
     );
   }
 }
