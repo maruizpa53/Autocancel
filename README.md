@@ -27,7 +27,8 @@
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
-$ La version con la que funciona correctamente este modulo es a partir de la 14.20.1 y hasta la 16.18.1. 
+
+$ La version con la que funciona correctamente este modulo es a partir de la 14.20.1 y hasta la 16.18.1.
 
 ```bash
 $ npm install

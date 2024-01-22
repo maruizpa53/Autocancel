@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment = require('moment');
 
 const API_URL =
-  'https://ghost-main-static-64f04ca2f3c14e389bfc008da643bd2b.ghostapi.app:29003/api/v1';
+  'https://ghost-main-static-a2208c2d92574cbf9395d7aec328caca.ghostapi.app:29003/api/v1';
 @Injectable()
 export default class ApiService {
   // Metodo de Web API / Ghost - METODO - POST
@@ -44,8 +44,8 @@ export default class ApiService {
         const timeDifference = moment.duration(
           currentDatetime.diff(referenceDatetime),
         );
-        // Check if more than 5 minutes have passed
-        if (timeDifference.asMinutes() >= 5) {
+        // Check if more than minutes (-1) have passed
+        if (timeDifference.asMinutes() >= 2) {
           try {
             await axios.delete(`${API_URL}/bookings/${booking.id}`, {
               headers,
@@ -53,13 +53,14 @@ export default class ApiService {
           } catch (err) {
             console.log(err);
           }
-          console.log('Voy a Borrar el ID: ', booking.id);
+          console.log('He cancelado el servicio con el ID: ', booking.id);
         } else {
           console.log('NO eliminar!');
         }
       }),
     );
   }
+  // Cancelacion de reservas por Web API / API - Azure
   async postData(): Promise<any> {
     const body = {
       types: ['Active'],
@@ -79,6 +80,7 @@ export default class ApiService {
     console.log(response.data.bookings.bookedAtTime);
     return response.data.bookings;
   }
+  // Cancelacion de reservas por Web API / API - Azure
   async deleteData(bookings: any[]): Promise<void> {
     const headers = {
       'Ocp-Apim-Subscription-Key': '5018266f057b4ce093e247b73944350a',
@@ -97,7 +99,7 @@ export default class ApiService {
           currentDatetime.diff(referenceDatetime),
         );
 
-        // Check if more than 5 minutes have passed
+        // Check if more than minutes (-1) have passed
         if (timeDifference.asMinutes() >= 1) {
           try {
             await axios.delete(
